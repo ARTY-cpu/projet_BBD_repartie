@@ -1021,5 +1021,3 @@ psql -U postgres -d site_rabat     -f 05_donnees_s2.sql
 # 4. Executer les requetes
 psql -U postgres -d site_casablanca -f 06_requetes.sql
 ```
-
-*Note : adapter le user/password dans les scripts 02 et 03 (`OPTIONS (user 'postgres', password 'postgres')`) si votre configuration PostgreSQL est differente.*
