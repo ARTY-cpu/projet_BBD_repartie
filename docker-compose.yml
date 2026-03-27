@@ -1,0 +1,65 @@
+services:
+  site_casablanca:
+    image: postgres:16
+    container_name: site_casablanca
+    environment:
+      POSTGRES_DB: site_casablanca
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./docker/init-s1/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./04_donnees_s1.sql:/docker-entrypoint-initdb.d/02_data.sql
+      - pgdata_s1:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d site_casablanca"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    networks:
+      - bdr_network
+
+  site_rabat:
+    image: postgres:16
+    container_name: site_rabat
+    environment:
+      POSTGRES_DB: site_rabat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./docker/init-s2/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./05_donnees_s2.sql:/docker-entrypoint-initdb.d/02_data.sql
+      - pgdata_s2:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d site_rabat"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    networks:
+      - bdr_network
+
+  setup:
+    image: postgres:16
+    container_name: bdr_setup
+    depends_on:
+      site_casablanca:
+        condition: service_healthy
+      site_rabat:
+        condition: service_healthy
+    volumes:
+      - ./docker/setup:/setup
+      - ./06_requetes.sql:/setup/06_requetes.sql
+    entrypoint: ["/bin/bash", "/setup/init.sh"]
+    networks:
+      - bdr_network
+
+volumes:
+  pgdata_s1:
+  pgdata_s2:
+
+networks:
+  bdr_network:
+    driver: bridge
