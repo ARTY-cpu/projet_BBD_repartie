@@ -76,7 +76,7 @@ L'entreprise exploite dans chaque ville :
 
 La problematique centrale de ce projet est la suivante : comment organiser les donnees d'une entreprise multi-sites de maniere a garantir a la fois une **gestion locale performante** des donnees propres a chaque ville, et un **acces global transparent** a l'ensemble des informations du reseau ?
 
-Cette problematique s'inscrit pleinement dans les objectifs des bases de donnees reparties tels que definis dans le chapitre 4 du cours : performance, autonomie locale, extensibilite, egalite entre sites et transparence vis-a-vis de la repartition.
+Cette problematique touche directement aux objectifs des bases de donnees reparties : performance, autonomie locale, extensibilite et transparence vis-a-vis de la repartition.
 
 ### 1.3 Demarche adoptee
 
@@ -119,13 +119,13 @@ L'architecture repartie repond directement a chacun des problemes identifies :
 
 **Autonomie locale** : chaque ville peut travailler sur ses propres donnees (patients locaux, stocks locaux, ventes locales) de maniere independante. Un medecin a Casablanca accede directement au dossier de son patient sans solliciter le site de Rabat.
 
-**Performance par localite** : les acces aux donnees locales sont directs, sans latence reseau. On estime qu'environ 80% des operations quotidiennes d'un site sont purement locales (consultation de dossiers patients du site, enregistrement des ventes locales, gestion du stock local).
+**Performance par localite** : les acces aux donnees locales sont directs, sans latence reseau. La grande majorite des operations quotidiennes d'un site sont purement locales : consultation de dossiers patients, enregistrement des ventes, gestion du stock.
 
 **Disponibilite amelioree** : si un site est indisponible (panne serveur, maintenance, coupure reseau), l'autre site peut continuer a fonctionner sur ses donnees locales. Le fonctionnement n'est que partiellement degrade.
 
 **Extensibilite** : l'ajout d'un nouveau site (par exemple une troisieme ville comme Marrakech) est facilite par l'architecture modulaire. Il suffit d'ajouter un nouveau noeud et de configurer les liaisons FDW.
 
-**Reduction du trafic reseau** : seules les requetes necessitant des donnees distantes (reporting consolide, requetes cross-site) generent du trafic inter-sites. Les operations courantes restent locales.
+**Reduction du trafic reseau** : seules les requetes necessitant des donnees distantes (reporting consolide, requetes cross-site) generent du trafic inter-sites. Les operations courantes ne sollicitent pas le reseau.
 
 ### 2.3 Donnees principalement utilisees a Casablanca (S1)
 
@@ -165,9 +165,9 @@ Certaines donnees doivent pouvoir etre consultees depuis les deux sites :
 
 | Critere | Architecture centralisee | Architecture repartie | Gain |
 |---------|------------------------|-----------------------|------|
-| **Performance locale** | Latence reseau pour le site distant | Acces direct aux donnees locales | ~80% des requetes sans latence |
+| **Performance locale** | Latence reseau pour le site distant | Acces direct aux donnees locales | Requetes courantes sans latence |
 | **Autonomie** | Dependance totale au serveur central | Chaque site fonctionne independamment | Continuite en cas de coupure |
-| **Trafic reseau** | Toutes les requetes transitent par le reseau | Seules les requetes globales | Reduction de ~80% du trafic |
+| **Trafic reseau** | Toutes les requetes transitent par le reseau | Seules les requetes globales | Trafic inter-sites reduit |
 | **Disponibilite** | Panne centrale = arret total | Panne d'un site = fonctionnement degrade | Pas d'arret complet |
 | **Montee en charge** | Limitee a un seul serveur | Repartie sur les deux serveurs | Capacite doublee |
 
@@ -346,7 +346,7 @@ Patient_Casa  = sigma(Ville = 'Casablanca')(Patient)  -> alloue a S1
 Patient_Rabat = sigma(Ville = 'Rabat')(Patient)        -> alloue a S2
 ```
 
-**Justification fonctionnelle** : les patients sont principalement geres par la clinique et la pharmacie de leur ville de residence. Les consultations, prescriptions et dossiers medicaux sont consultes localement dans la grande majorite des cas (~90%). Cette fragmentation garantit que les donnees les plus accedees localement sont stockees directement sur le site local, evitant ainsi des acces distants frequents.
+**Justification fonctionnelle** : les patients sont principalement geres par la clinique et la pharmacie de leur ville de residence. Les consultations, prescriptions et dossiers medicaux sont consultes localement dans la grande majorite des cas. Cette fragmentation garantit que les donnees les plus accedees localement sont stockees directement sur le site local, evitant ainsi des acces distants frequents.
 
 **Proprietes :**
 - **Completude** : Patient_Casa UNION Patient_Rabat = Patient (tous les tuples sont couverts)
@@ -410,24 +410,6 @@ Cette fragmentation separe les colonnes en deux groupes correspondant a deux pro
 - **Reconstruction** : jointure naturelle sur IdMedicament (la cle primaire est presente dans les deux fragments)
 
 Cette fragmentation est **reellement distribuee** : les deux fragments sont physiquement stockes sur des sites differents. La reconstruction du Medicament complet necessite une jointure distante via `postgres_fdw`.
-
-#### Schema V2 - Fragmentation mixte de Patient (horizontale + verticale)
-
-Apres la fragmentation horizontale par Ville, nous definissons une fragmentation verticale applicable a chaque fragment horizontal :
-
-**Definition formelle :**
-```
-Patient_Identite = pi(IdPatient, Nom, Prenom, DateNaissance, Sexe, Ville)(Patient)
-Patient_Contact  = pi(IdPatient, Adresse, Telephone)(Patient)
-```
-
-**Justification fonctionnelle** :
-
-- **Patient_Identite** contient les donnees medicales essentielles utilisees par les medecins lors des consultations : identite du patient, age (calcule a partir de la date de naissance), sexe. Ces informations sont consultees a chaque acte medical.
-
-- **Patient_Contact** contient les donnees administratives utilisees par le secretariat medical et la pharmacie pour les rappels de rendez-vous, les notifications et la facturation.
-
-Cette combinaison d'une fragmentation horizontale suivie d'une fragmentation verticale constitue une **fragmentation mixte** (ou hybride). Dans notre implementation, les deux fragments verticaux sont co-localises sur le meme site pour eviter des jointures distantes systematiques sur une table tres frequemment accedee.
 
 <div style="page-break-after: always;"></div>
 
@@ -961,7 +943,7 @@ La **fragmentation verticale** du catalogue de medicaments illustre un cas d'usa
 
 L'extension **postgres_fdw** s'est montree suffisante pour simuler un environnement reparti, offrant une transparence d'acces grace aux vues globales et aux triggers d'insertion. L'utilisation de Docker Compose pour simuler deux instances PostgreSQL independantes a permis de reproduire de maniere realiste un environnement multi-sites.
 
-Les **limites identifiees** (absence de 2PC, pas de replication native, impossibilite des FK cross-site, performances des jointures distantes) correspondent aux defis reels des bases de donnees reparties tels que presentes dans le chapitre 4 du cours. Ces limites montrent que la mise en oeuvre d'une BDR necessite des compromis entre performance, coherence et disponibilite, conformement au theoreme CAP.
+Les **limites identifiees** (absence de 2PC, pas de replication native, impossibilite des FK cross-site, performances des jointures distantes) sont inherentes aux systemes distribues et montrent que la mise en oeuvre d'une BDR necessite des compromis entre performance, coherence et disponibilite.
 
 En conclusion, cette implementation demontre qu'une base de donnees repartie offre des avantages significatifs en termes de performance locale, d'autonomie des sites et de transparence d'acces, au prix d'une complexite de gestion accrue en matiere de coherence transactionnelle et de tolerance aux pannes.
 

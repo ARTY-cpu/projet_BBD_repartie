@@ -1,22 +1,11 @@
--- ============================================================
--- SCHEMA GLOBAL CONCEPTUEL
--- Base de donnees repartie pour la gestion d'une chaine
--- de pharmacies / cliniques sur deux villes
--- ============================================================
--- Sites : S1 (Casablanca) et S2 (Rabat)
+-- Schema global conceptuel - avant fragmentation
+-- S1 = Casablanca, S2 = Rabat
 --
--- Ce script definit le schema relationnel global unifie,
--- avant toute fragmentation ou allocation.
--- Il sert de reference pour la conception descendante.
--- ============================================================
+-- Pour creer les bases (en superutilisateur) :
+--   CREATE DATABASE site_casablanca;
+--   CREATE DATABASE site_rabat;
 
--- PREREQUIS : Creer les deux bases de donnees (en tant que superutilisateur)
--- CREATE DATABASE site_casablanca;
--- CREATE DATABASE site_rabat;
-
--- ============================================================
--- Nettoyage (si re-execution)
--- ============================================================
+-- Nettoyage si re-execution
 DROP TABLE IF EXISTS LigneVente CASCADE;
 DROP TABLE IF EXISTS LignePrescription CASCADE;
 DROP TABLE IF EXISTS Vente CASCADE;
@@ -27,10 +16,6 @@ DROP TABLE IF EXISTS Medicament CASCADE;
 DROP TABLE IF EXISTS Medecin CASCADE;
 DROP TABLE IF EXISTS Patient CASCADE;
 
--- ============================================================
--- TABLE : Patient
--- Cle primaire : IdPatient
--- ============================================================
 CREATE TABLE Patient (
     IdPatient       INT             PRIMARY KEY,
     Nom             VARCHAR(50)     NOT NULL,
@@ -42,10 +27,6 @@ CREATE TABLE Patient (
     Telephone       VARCHAR(20)
 );
 
--- ============================================================
--- TABLE : Medecin
--- Cle primaire : IdMedecin
--- ============================================================
 CREATE TABLE Medecin (
     IdMedecin       INT             PRIMARY KEY,
     NomMedecin      VARCHAR(100)    NOT NULL,
@@ -54,11 +35,8 @@ CREATE TABLE Medecin (
     Telephone       VARCHAR(20)
 );
 
--- ============================================================
--- TABLE : Consultation
--- Cle primaire : IdConsultation
--- Cles etrangeres : IdPatient -> Patient, IdMedecin -> Medecin
--- ============================================================
+-- IdPatient sans FK ici car dans la version repartie un patient peut consulter
+-- un medecin dans l'autre ville (acces via FDW)
 CREATE TABLE Consultation (
     IdConsultation  INT             PRIMARY KEY,
     DateConsultation DATE           NOT NULL,
@@ -67,11 +45,7 @@ CREATE TABLE Consultation (
     IdMedecin       INT             NOT NULL REFERENCES Medecin(IdMedecin)
 );
 
--- ============================================================
--- TABLE : Prescription
--- Cle primaire : IdPrescription
--- Cle etrangere : IdConsultation -> Consultation (relation 1:1)
--- ============================================================
+-- 1 consultation = au plus 1 prescription (UNIQUE sur IdConsultation)
 CREATE TABLE Prescription (
     IdPrescription  INT             PRIMARY KEY,
     DatePrescription DATE           NOT NULL,
@@ -79,10 +53,8 @@ CREATE TABLE Prescription (
                                     REFERENCES Consultation(IdConsultation)
 );
 
--- ============================================================
--- TABLE : Medicament
--- Cle primaire : IdMedicament
--- ============================================================
+-- Dans la version repartie, cette table sera fragmentee verticalement :
+--   Medicament_Base (S1) pour les infos pharma, Medicament_Commercial (S2) pour le prix/fabricant
 CREATE TABLE Medicament (
     IdMedicament    INT             PRIMARY KEY,
     NomMedicament   VARCHAR(100)    NOT NULL,
@@ -93,12 +65,6 @@ CREATE TABLE Medicament (
     VilleProduction VARCHAR(50)
 );
 
--- ============================================================
--- TABLE : LignePrescription
--- Cle primaire composee : (IdPrescription, IdMedicament)
--- Cles etrangeres : IdPrescription -> Prescription,
---                   IdMedicament   -> Medicament
--- ============================================================
 CREATE TABLE LignePrescription (
     IdPrescription  INT             NOT NULL REFERENCES Prescription(IdPrescription),
     IdMedicament    INT             NOT NULL REFERENCES Medicament(IdMedicament),
@@ -107,12 +73,8 @@ CREATE TABLE LignePrescription (
     PRIMARY KEY (IdPrescription, IdMedicament)
 );
 
--- ============================================================
--- TABLE : Stock
--- Cle primaire : IdStock
--- Cle etrangere : IdMedicament -> Medicament
--- Contrainte d'unicite : (IdMedicament, Ville)
--- ============================================================
+-- Pas de UNIQUE(IdMedicament, Ville) dans la version repartie car chaque site
+-- ne stocke que sa propre ville
 CREATE TABLE Stock (
     IdStock             INT             PRIMARY KEY,
     IdMedicament        INT             NOT NULL REFERENCES Medicament(IdMedicament),
@@ -122,11 +84,6 @@ CREATE TABLE Stock (
     UNIQUE (IdMedicament, Ville)
 );
 
--- ============================================================
--- TABLE : Vente
--- Cle primaire : IdVente
--- Cle etrangere : IdPatient -> Patient
--- ============================================================
 CREATE TABLE Vente (
     IdVente         INT             PRIMARY KEY,
     DateVente       DATE            NOT NULL,
@@ -135,11 +92,6 @@ CREATE TABLE Vente (
     MontantTotal    DECIMAL(10,2)   NOT NULL
 );
 
--- ============================================================
--- TABLE : LigneVente
--- Cle primaire composee : (IdVente, IdMedicament)
--- Cles etrangeres : IdVente -> Vente, IdMedicament -> Medicament
--- ============================================================
 CREATE TABLE LigneVente (
     IdVente         INT             NOT NULL REFERENCES Vente(IdVente),
     IdMedicament    INT             NOT NULL REFERENCES Medicament(IdMedicament),

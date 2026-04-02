@@ -1,13 +1,7 @@
--- ============================================================
--- SITE S2 - RABAT
--- Script de fragmentation, configuration FDW, vues globales
--- ============================================================
--- Connexion prealable : \c site_rabat
--- ============================================================
+-- Site S2 - Rabat
+-- A executer apres connexion : \c site_rabat
 
--- ============================================================
--- NETTOYAGE
--- ============================================================
+-- Nettoyage complet avant re-creation
 DROP TRIGGER IF EXISTS trg_insert_v_patient ON v_patient;
 DROP TRIGGER IF EXISTS trg_insert_v_vente ON v_vente;
 DROP TRIGGER IF EXISTS trg_insert_v_medicament ON v_medicament;
@@ -49,14 +43,12 @@ DROP USER MAPPING IF EXISTS FOR CURRENT_USER SERVER site_casablanca;
 DROP SERVER IF EXISTS site_casablanca CASCADE;
 DROP EXTENSION IF EXISTS postgres_fdw CASCADE;
 
--- ============================================================
--- 1. TABLES LOCALES (Fragments de Rabat)
--- ============================================================
 
 -- -------------------------------------------------------
--- Fragmentation HORIZONTALE de Patient (Ville = 'Rabat')
--- Critere : sigma(Ville='Rabat')(Patient)
+-- 1. Tables locales - fragments de Rabat
 -- -------------------------------------------------------
+
+-- Fragmentation horizontale : sigma(Ville='Rabat')(Patient)
 CREATE TABLE Patient (
     IdPatient       INT             PRIMARY KEY,
     Nom             VARCHAR(50)     NOT NULL,
@@ -69,10 +61,7 @@ CREATE TABLE Patient (
     Telephone       VARCHAR(20)
 );
 
--- -------------------------------------------------------
--- Fragmentation HORIZONTALE de Medecin (Ville = 'Rabat')
--- Critere : sigma(Ville='Rabat')(Medecin)
--- -------------------------------------------------------
+-- Fragmentation horizontale : sigma(Ville='Rabat')(Medecin)
 CREATE TABLE Medecin (
     IdMedecin       INT             PRIMARY KEY,
     NomMedecin      VARCHAR(100)    NOT NULL,
@@ -82,12 +71,8 @@ CREATE TABLE Medecin (
     Telephone       VARCHAR(20)
 );
 
--- -------------------------------------------------------
--- Fragmentation horizontale DERIVEE de Consultation
--- Les consultations realisees par les medecins de Rabat
--- sont stockees sur S2.
--- Note : IdPatient sans FK locale car le patient peut venir de Casablanca
--- -------------------------------------------------------
+-- Fragmentation horizontale derivee : les consultations suivent le medecin
+-- IdPatient sans FK locale car un patient de Casablanca peut consulter ici
 CREATE TABLE Consultation (
     IdConsultation  INT             PRIMARY KEY,
     DateConsultation DATE           NOT NULL,
@@ -96,9 +81,7 @@ CREATE TABLE Consultation (
     IdMedecin       INT             NOT NULL REFERENCES Medecin(IdMedecin)
 );
 
--- -------------------------------------------------------
--- Fragmentation derivee de Prescription (suit Consultation)
--- -------------------------------------------------------
+-- Suit Consultation (meme fragment)
 CREATE TABLE Prescription (
     IdPrescription  INT             PRIMARY KEY,
     DatePrescription DATE           NOT NULL,
@@ -106,11 +89,9 @@ CREATE TABLE Prescription (
                                     REFERENCES Consultation(IdConsultation)
 );
 
--- -------------------------------------------------------
--- Fragmentation VERTICALE de Medicament : fragment COMMERCIAL
--- Contient les informations commerciales et de fabrication
--- pi(IdMedicament, PrixUnitaire, Fabricant, VilleProduction)(Medicament) -> S2
--- -------------------------------------------------------
+-- Fragmentation verticale de Medicament : fragment COMMERCIAL (prix, fabricant)
+-- pi(IdMedicament, PrixUnitaire, Fabricant, VilleProduction) -> S2
+-- La partie pharmaceutique (nom, forme, dosage) est sur S1
 CREATE TABLE Medicament_Commercial (
     IdMedicament    INT             PRIMARY KEY,
     PrixUnitaire    DECIMAL(10,2)   NOT NULL,
@@ -118,9 +99,6 @@ CREATE TABLE Medicament_Commercial (
     VilleProduction VARCHAR(50)
 );
 
--- -------------------------------------------------------
--- Fragmentation derivee de LignePrescription
--- -------------------------------------------------------
 CREATE TABLE LignePrescription (
     IdPrescription  INT             NOT NULL REFERENCES Prescription(IdPrescription),
     IdMedicament    INT             NOT NULL REFERENCES Medicament_Commercial(IdMedicament),
@@ -129,10 +107,7 @@ CREATE TABLE LignePrescription (
     PRIMARY KEY (IdPrescription, IdMedicament)
 );
 
--- -------------------------------------------------------
--- Fragmentation HORIZONTALE de Stock (Ville = 'Rabat')
--- sigma(Ville='Rabat')(Stock)
--- -------------------------------------------------------
+-- Fragmentation horizontale : sigma(Ville='Rabat')(Stock)
 CREATE TABLE Stock (
     IdStock             INT             PRIMARY KEY,
     IdMedicament        INT             NOT NULL REFERENCES Medicament_Commercial(IdMedicament),
@@ -142,11 +117,8 @@ CREATE TABLE Stock (
     SeuilAlerte         INT             NOT NULL DEFAULT 10
 );
 
--- -------------------------------------------------------
--- Fragmentation HORIZONTALE de Vente (Ville = 'Rabat')
--- sigma(Ville='Rabat')(Vente)
--- Note : IdPatient sans FK car le patient peut provenir de Casablanca
--- -------------------------------------------------------
+-- Fragmentation horizontale : sigma(Ville='Rabat')(Vente)
+-- IdPatient sans FK car un patient de Casablanca peut acheter a Rabat
 CREATE TABLE Vente (
     IdVente         INT             PRIMARY KEY,
     DateVente       DATE            NOT NULL,
@@ -156,9 +128,6 @@ CREATE TABLE Vente (
     MontantTotal    DECIMAL(10,2)   NOT NULL
 );
 
--- -------------------------------------------------------
--- Fragmentation derivee de LigneVente (suit Vente)
--- -------------------------------------------------------
 CREATE TABLE LigneVente (
     IdVente         INT             NOT NULL REFERENCES Vente(IdVente),
     IdMedicament    INT             NOT NULL REFERENCES Medicament_Commercial(IdMedicament),
@@ -167,9 +136,10 @@ CREATE TABLE LigneVente (
     PRIMARY KEY (IdVente, IdMedicament)
 );
 
--- ============================================================
--- 2. CONFIGURATION postgres_fdw (acces au site distant S1)
--- ============================================================
+
+-- -------------------------------------------------------
+-- 2. Configuration FDW vers S1 (site_casablanca)
+-- -------------------------------------------------------
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
@@ -182,9 +152,10 @@ CREATE USER MAPPING FOR CURRENT_USER
     SERVER site_casablanca
     OPTIONS (user 'postgres', password 'postgres');
 
--- ============================================================
--- 3. TABLES DISTANTES (acces aux fragments de Casablanca via FDW)
--- ============================================================
+
+-- -------------------------------------------------------
+-- 3. Tables distantes - acces aux fragments de Casablanca via FDW
+-- -------------------------------------------------------
 
 CREATE FOREIGN TABLE Patient_Casa (
     IdPatient       INT,
@@ -226,7 +197,7 @@ CREATE FOREIGN TABLE LignePrescription_Casa (
     Posologie       VARCHAR(200)
 ) SERVER site_casablanca OPTIONS (schema_name 'public', table_name 'ligneprescription');
 
--- Fragment vertical distant : partie BASE (stockee sur S1)
+-- Fragment vertical distant : partie pharmaceutique du medicament (stockee sur S1)
 CREATE FOREIGN TABLE Medicament_Base (
     IdMedicament    INT,
     NomMedicament   VARCHAR(100),
@@ -257,11 +228,12 @@ CREATE FOREIGN TABLE LigneVente_Casa (
     PrixVente       DECIMAL(10,2)
 ) SERVER site_casablanca OPTIONS (schema_name 'public', table_name 'lignevente');
 
--- ============================================================
--- 4. VUES GLOBALES (reconstruction du schema global)
--- ============================================================
 
--- Reconstruction de Patient par UNION des fragments horizontaux
+-- -------------------------------------------------------
+-- 4. Vues globales - reconstruction du schema complet
+-- -------------------------------------------------------
+
+-- UNION des deux fragments horizontaux
 CREATE VIEW v_Patient AS
     SELECT IdPatient, Nom, Prenom, DateNaissance, Sexe, Adresse, Ville, Telephone
     FROM Patient
@@ -269,7 +241,6 @@ CREATE VIEW v_Patient AS
     SELECT IdPatient, Nom, Prenom, DateNaissance, Sexe, Adresse, Ville, Telephone
     FROM Patient_Casa;
 
--- Reconstruction de Medecin par UNION des fragments horizontaux
 CREATE VIEW v_Medecin AS
     SELECT IdMedecin, NomMedecin, Specialite, Ville, Telephone
     FROM Medecin
@@ -277,15 +248,13 @@ CREATE VIEW v_Medecin AS
     SELECT IdMedecin, NomMedecin, Specialite, Ville, Telephone
     FROM Medecin_Casa;
 
--- Reconstruction de Medicament par JOINTURE des fragments verticaux
--- Medicament_Base (distant S1) JOIN Medicament_Commercial (local S2)
+-- Jointure des deux fragments verticaux pour reconstruire Medicament
 CREATE VIEW v_Medicament AS
     SELECT b.IdMedicament, b.NomMedicament, b.Forme, b.Dosage,
            c.PrixUnitaire, c.Fabricant, c.VilleProduction
     FROM Medicament_Base b
     JOIN Medicament_Commercial c ON b.IdMedicament = c.IdMedicament;
 
--- Reconstruction de Consultation
 CREATE VIEW v_Consultation AS
     SELECT IdConsultation, DateConsultation, Diagnostic, IdPatient, IdMedecin
     FROM Consultation
@@ -293,7 +262,6 @@ CREATE VIEW v_Consultation AS
     SELECT IdConsultation, DateConsultation, Diagnostic, IdPatient, IdMedecin
     FROM Consultation_Casa;
 
--- Reconstruction de Prescription
 CREATE VIEW v_Prescription AS
     SELECT IdPrescription, DatePrescription, IdConsultation
     FROM Prescription
@@ -301,7 +269,6 @@ CREATE VIEW v_Prescription AS
     SELECT IdPrescription, DatePrescription, IdConsultation
     FROM Prescription_Casa;
 
--- Reconstruction de LignePrescription
 CREATE VIEW v_LignePrescription AS
     SELECT IdPrescription, IdMedicament, Quantite, Posologie
     FROM LignePrescription
@@ -309,7 +276,6 @@ CREATE VIEW v_LignePrescription AS
     SELECT IdPrescription, IdMedicament, Quantite, Posologie
     FROM LignePrescription_Casa;
 
--- Reconstruction de Stock
 CREATE VIEW v_Stock AS
     SELECT IdStock, IdMedicament, Ville, QuantiteDisponible, SeuilAlerte
     FROM Stock
@@ -317,7 +283,6 @@ CREATE VIEW v_Stock AS
     SELECT IdStock, IdMedicament, Ville, QuantiteDisponible, SeuilAlerte
     FROM Stock_Casa;
 
--- Reconstruction de Vente
 CREATE VIEW v_Vente AS
     SELECT IdVente, DateVente, Ville, IdPatient, MontantTotal
     FROM Vente
@@ -325,7 +290,6 @@ CREATE VIEW v_Vente AS
     SELECT IdVente, DateVente, Ville, IdPatient, MontantTotal
     FROM Vente_Casa;
 
--- Reconstruction de LigneVente
 CREATE VIEW v_LigneVente AS
     SELECT IdVente, IdMedicament, Quantite, PrixVente
     FROM LigneVente
@@ -333,13 +297,13 @@ CREATE VIEW v_LigneVente AS
     SELECT IdVente, IdMedicament, Quantite, PrixVente
     FROM LigneVente_Casa;
 
--- ============================================================
--- 5. MECANISME D'INSERTION TRANSPARENTE (triggers INSTEAD OF)
--- ============================================================
 
 -- -------------------------------------------------------
--- Insertion transparente dans v_Patient
+-- 5. Triggers INSTEAD OF pour l'insertion transparente
+--    L'utilisateur insere dans la vue, le trigger redirige
+--    vers le bon fragment selon la ville
 -- -------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION fn_insert_patient()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -358,9 +322,6 @@ CREATE TRIGGER trg_insert_v_patient
     INSTEAD OF INSERT ON v_Patient
     FOR EACH ROW EXECUTE FUNCTION fn_insert_patient();
 
--- -------------------------------------------------------
--- Insertion transparente dans v_Vente
--- -------------------------------------------------------
 CREATE OR REPLACE FUNCTION fn_insert_vente()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -379,11 +340,7 @@ CREATE TRIGGER trg_insert_v_vente
     INSTEAD OF INSERT ON v_Vente
     FOR EACH ROW EXECUTE FUNCTION fn_insert_vente();
 
--- -------------------------------------------------------
--- Insertion transparente dans v_Medicament
--- Insere simultanement dans les deux fragments verticaux :
---   Medicament_Commercial (local) et Medicament_Base (distant)
--- -------------------------------------------------------
+-- Pour Medicament : on insere en local (commercial) puis on ecrit sur S1 (base) via FDW
 CREATE OR REPLACE FUNCTION fn_insert_medicament()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -401,9 +358,6 @@ CREATE TRIGGER trg_insert_v_medicament
     INSTEAD OF INSERT ON v_Medicament
     FOR EACH ROW EXECUTE FUNCTION fn_insert_medicament();
 
--- -------------------------------------------------------
--- Insertion transparente dans v_Stock
--- -------------------------------------------------------
 CREATE OR REPLACE FUNCTION fn_insert_stock()
 RETURNS TRIGGER AS $$
 BEGIN
