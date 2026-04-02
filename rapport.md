@@ -16,7 +16,7 @@
 
 **Filiere** : LSI2 - ING2
 
-**Module** : Base de Donnees
+**Module** : Base de Donnees Reparties
 
 **Enseignante** : Mme Marwa HARZI
 
