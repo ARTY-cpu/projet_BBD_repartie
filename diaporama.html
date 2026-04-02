@@ -1,0 +1,1899 @@
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BDR - Chaîne Pharmacies/Cliniques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+  <style>
+    body.light {
+      background-color: #f5f5f5 !important;
+      color: #171717 !important;
+    }
+    body.light [class~="text-white"] { color: #171717 !important; }
+    body.light [class*="text-neutral-200"] { color: #262626 !important; }
+    body.light [class*="text-neutral-300"] { color: #404040 !important; }
+    body.light [class*="text-neutral-400"] { color: #525252 !important; }
+    body.light [class*="text-neutral-500"] { color: #737373 !important; }
+    body.light [class*="text-neutral-600"] { color: #a3a3a3 !important; }
+    body.light [class*="bg-neutral-9"] { background-color: rgba(212, 212, 212, 0.5) !important; }
+    body.light [class*="bg-neutral-8"] { background-color: #d4d4d4 !important; }
+    body.light [class*="border-neutral-8"] { border-color: #d4d4d4 !important; }
+    body.light [class*="bg-white/5"],
+    body.light [class*="bg-white/10"] { background-color: rgba(0,0,0,0.05) !important; }
+    body.light [class*="border-white/10"] { border-color: rgba(0,0,0,0.12) !important; }
+    body.light pre, body.light code { color: #404040 !important; }
+    body.light [class*="text-violet-4"] code,
+    body.light [class*="text-blue-4"] code,
+    body.light [class*="text-amber-4"] code,
+    body.light [class*="text-emerald-4"] code { color: inherit !important; }
+    body.light { transition: background-color 0.3s ease, color 0.3s ease; }
+  </style>
+  </head>
+  <body
+    style="font-family: 'Inter', sans-serif"
+    class="bg-neutral-950 text-white overflow-hidden h-screen w-screen"
+  >
+    <!-- Progress Bar -->
+    <div class="fixed top-0 left-0 right-0 z-50 h-1 bg-neutral-800">
+      <div
+        id="progressBar"
+        class="h-full bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-500 ease-out"
+        style="width: 0%"
+      ></div>
+    </div>
+
+    <!-- Speaker Badge -->
+    <div
+      id="speakerBadge"
+      class="fixed top-5 right-8 z-50 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-500"
+      style="backdrop-filter: blur(8px)"
+    ></div>
+
+    <!-- Theme Toggle -->
+    <button id="themeToggle" onclick="toggleTheme()" class="fixed bottom-6 left-8 z-50 p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all opacity-40 hover:opacity-100" style="backdrop-filter: blur(8px);">
+        <iconify-icon id="themeIcon" icon="solar:sun-linear" width="16" style="color: #a3a3a3; stroke-width: 1.5;"></iconify-icon>
+    </button>
+
+    <!-- Slide Counter -->
+    <div
+      class="fixed bottom-6 right-8 z-50 text-neutral-500 text-xs font-medium tracking-wide"
+    >
+      <span id="currentSlide">1</span> / <span id="totalSlides">14</span>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button
+      onclick="prevSlide()"
+      class="fixed left-6 top-1/2 -translate-y-1/2 z-50 p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all opacity-40 hover:opacity-100"
+      style="backdrop-filter: blur(8px)"
+    >
+      <iconify-icon
+        icon="solar:arrow-left-linear"
+        width="20"
+        style="color: #a3a3a3; stroke-width: 1.5"
+      ></iconify-icon>
+    </button>
+    <button
+      onclick="nextSlide()"
+      class="fixed right-6 top-1/2 -translate-y-1/2 z-50 p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all opacity-40 hover:opacity-100"
+      style="backdrop-filter: blur(8px)"
+    >
+      <iconify-icon
+        icon="solar:arrow-right-linear"
+        width="20"
+        style="color: #a3a3a3; stroke-width: 1.5"
+      ></iconify-icon>
+    </button>
+
+    <!-- SLIDES CONTAINER -->
+    <div id="slidesContainer" class="relative h-full w-full">
+      <!-- ==================== SLIDE 1: TITRE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center"
+        data-index="0"
+        data-speaker="Tous"
+      >
+        <div class="text-center max-w-3xl mx-auto px-8">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 mb-8"
+          >
+            <iconify-icon
+              icon="solar:database-linear"
+              width="14"
+              style="color: #3b82f6; stroke-width: 1.5"
+            ></iconify-icon>
+            <span class="text-blue-400 text-xs font-medium"
+              >Base de Données Réparties</span
+            >
+          </div>
+          <h1
+            class="text-4xl sm:text-5xl font-semibold tracking-tight leading-tight mb-6"
+          >
+            Gestion d'une chaîne de
+            <span
+              class="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent"
+              >pharmacies &amp; cliniques</span
+            >
+          </h1>
+          <p
+            class="text-neutral-400 text-base sm:text-lg mb-10 leading-relaxed"
+          >
+            Comment gérer les données de deux villes avec une base répartie
+          </p>
+          <div
+            class="flex flex-wrap items-center justify-center gap-3 text-xs mb-10"
+          >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400"
+              >Mehedi</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400"
+              >Adil</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+              >Alexis</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400"
+              >Arthur</span
+            >
+          </div>
+          <div
+            class="flex items-center justify-center gap-6 text-xs text-neutral-600"
+          >
+            <span>EFREI Paris — LSI2 / ING2</span>
+            <span class="w-1 h-1 rounded-full bg-neutral-700"></span>
+            <span>Mme Marwa HARZI</span>
+            <span class="w-1 h-1 rounded-full bg-neutral-700"></span>
+            <span>Avril 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 2: PLAN ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="1"
+        data-speaker="Adil"
+      >
+        <div class="max-w-2xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-blue-400 tracking-widest uppercase mb-3"
+          >
+            Sommaire
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-4">
+            Plan de la présentation
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Chacun présente sa partie — voici le déroulé
+          </p>
+          <div class="space-y-3">
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-violet-500/5 border border-violet-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-xs font-semibold text-violet-400"
+                >1</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >Le contexte : qu'est-ce qu'on gère ?</span
+              >
+              <span class="text-xs text-violet-400 font-medium">Adil</span>
+            </div>
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-violet-500/5 border border-violet-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-xs font-semibold text-violet-400"
+                >2</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >Pourquoi répartir les données ?</span
+              >
+              <span class="text-xs text-violet-400 font-medium">Adil</span>
+            </div>
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xs font-semibold text-blue-400"
+                >3</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >Le schéma global et la fragmentation</span
+              >
+              <span class="text-xs text-blue-400 font-medium">Mehedi</span>
+            </div>
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs font-semibold text-emerald-400"
+                >4</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >L'architecture technique et la transparence</span
+              >
+              <span class="text-xs text-emerald-400 font-medium">Alexis</span>
+            </div>
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs font-semibold text-emerald-400"
+                >5</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >Les requêtes réparties (démo)</span
+              >
+              <span class="text-xs text-emerald-400 font-medium">Alexis</span>
+            </div>
+            <div
+              class="flex items-center gap-4 p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/15"
+            >
+              <span
+                class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xs font-semibold text-amber-400"
+                >6</span
+              >
+              <span class="text-sm text-neutral-300 flex-1"
+                >Analyse critique, limites &amp; conclusion</span
+              >
+              <span class="text-xs text-amber-400 font-medium">Arthur</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 3: CONTEXTE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="2"
+        data-speaker="Adil"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-blue-400 tracking-widest uppercase mb-3"
+          >
+            01 — Le contexte
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            On gère quoi exactement ?
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Une entreprise de santé avec des cliniques et pharmacies dans
+            <span class="text-neutral-300">deux villes du Maroc</span>
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Site Casablanca -->
+            <div
+              class="p-6 rounded-2xl bg-gradient-to-br from-blue-500/5 to-blue-500/0 border border-blue-500/15"
+            >
+              <div class="flex items-center gap-3 mb-5">
+                <div
+                  class="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center"
+                >
+                  <iconify-icon
+                    icon="solar:buildings-2-linear"
+                    width="18"
+                    style="color: #3b82f6; stroke-width: 1.5"
+                  ></iconify-icon>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold">Casablanca</h3>
+                  <p class="text-xs text-neutral-500">Site S1</p>
+                </div>
+              </div>
+              <ul class="space-y-2.5 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:hospital-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #60a5fa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>1 clinique avec 3 médecins</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:pharmacy-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #60a5fa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>1 pharmacie qui vend les médicaments</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:users-group-rounded-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #60a5fa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>6 patients inscrits à Casablanca</span>
+                </li>
+              </ul>
+            </div>
+            <!-- Site Rabat -->
+            <div
+              class="p-6 rounded-2xl bg-gradient-to-br from-violet-500/5 to-violet-500/0 border border-violet-500/15"
+            >
+              <div class="flex items-center gap-3 mb-5">
+                <div
+                  class="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center"
+                >
+                  <iconify-icon
+                    icon="solar:buildings-2-linear"
+                    width="18"
+                    style="color: #8b5cf6; stroke-width: 1.5"
+                  ></iconify-icon>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold">Rabat</h3>
+                  <p class="text-xs text-neutral-500">Site S2</p>
+                </div>
+              </div>
+              <ul class="space-y-2.5 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:hospital-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #a78bfa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>1 clinique avec 3 médecins</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:pharmacy-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #a78bfa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>1 pharmacie partenaire</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:users-group-rounded-linear"
+                    width="16"
+                    class="mt-0.5 shrink-0"
+                    style="color: #a78bfa; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span>6 patients inscrits à Rabat</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="mt-8 p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-start gap-3"
+          >
+            <iconify-icon
+              icon="solar:question-circle-linear"
+              width="18"
+              class="mt-0.5 shrink-0"
+              style="color: #f59e0b; stroke-width: 1.5"
+            ></iconify-icon>
+            <p class="text-sm text-neutral-400">
+              <span class="text-amber-400 font-medium">La question :</span>
+              Comment organiser ces données pour que chaque ville travaille vite
+              en local, tout en gardant une vue d'ensemble ?
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 4: POURQUOI REPARTIE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="3"
+        data-speaker="Adil"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-blue-400 tracking-widest uppercase mb-3"
+          >
+            02 — Justification
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            Pourquoi ne pas tout mettre au même endroit ?
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            On compare les deux approches
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="p-5 rounded-2xl bg-red-500/5 border border-red-500/15">
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:close-circle-linear"
+                  width="16"
+                  style="color: #ef4444; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-semibold text-red-400"
+                  >Base centralisée</span
+                >
+              </div>
+              <ul class="space-y-3 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">✗</span>
+                  <span
+                    >Si le serveur tombe,
+                    <span class="text-red-400">tout s'arrête</span></span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">✗</span>
+                  <span
+                    >Rabat doit passer par le réseau à chaque requête →
+                    <span class="text-red-400">lent</span></span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 mt-0.5">✗</span>
+                  <span
+                    >Un seul serveur pour tout le monde →
+                    <span class="text-red-400">surchargé</span></span
+                  >
+                </li>
+              </ul>
+            </div>
+            <div
+              class="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:check-circle-linear"
+                  width="16"
+                  style="color: #10b981; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-semibold text-emerald-400"
+                  >Base répartie (notre choix)</span
+                >
+              </div>
+              <ul class="space-y-3 text-sm text-neutral-400">
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 mt-0.5">✓</span>
+                  <span
+                    >Chaque ville accède à
+                    <span class="text-emerald-400"
+                      >ses données directement</span
+                    ></span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 mt-0.5">✓</span>
+                  <span
+                    >Si un site tombe, l'autre
+                    <span class="text-emerald-400"
+                      >continue de fonctionner</span
+                    ></span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 mt-0.5">✓</span>
+                  <span
+                    >La charge est
+                    <span class="text-emerald-400"
+                      >répartie sur 2 serveurs</span
+                    ></span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="mt-6 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+          >
+            <p class="text-sm text-neutral-400 text-center">
+              <span class="text-neutral-200 font-medium">En résumé :</span> les
+              données de Casa restent à Casa, celles de Rabat restent à Rabat.
+              On ne passe par le réseau que quand on a besoin d'une
+              <span class="text-blue-400">vue globale</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 5: DEMARCHE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="4"
+        data-speaker="Mehedi"
+      >
+        <div class="max-w-3xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-violet-400 tracking-widest uppercase mb-3"
+          >
+            03 — Démarche
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            Comment on a procédé
+          </h2>
+          <p class="text-sm text-neutral-500 mb-10">
+            On a suivi une approche classique en 3 étapes : du global vers le
+            local
+          </p>
+          <div class="space-y-4">
+            <div
+              class="flex items-start gap-5 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-blue-400">1</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold mb-1">
+                  On conçoit le schéma global
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  On dessine toutes les tables comme si c'était une seule base →
+                  <span class="text-neutral-300">9 tables</span>
+                </p>
+              </div>
+            </div>
+            <div class="flex justify-center">
+              <iconify-icon
+                icon="solar:arrow-down-linear"
+                width="18"
+                style="color: #404040; stroke-width: 1.5"
+              ></iconify-icon>
+            </div>
+            <div
+              class="flex items-start gap-5 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-violet-400">2</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold mb-1">
+                  On découpe (fragmentation)
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  On sépare les données par ville (horizontal) et par usage
+                  (vertical)
+                </p>
+              </div>
+            </div>
+            <div class="flex justify-center">
+              <iconify-icon
+                icon="solar:arrow-down-linear"
+                width="18"
+                style="color: #404040; stroke-width: 1.5"
+              ></iconify-icon>
+            </div>
+            <div
+              class="flex items-start gap-5 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-emerald-400">3</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold mb-1">
+                  On place les morceaux (allocation)
+                </h3>
+                <p class="text-xs text-neutral-500">
+                  On décide quel serveur stocke quoi, et on connecte les deux
+                  avec FDW
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex flex-wrap gap-2 justify-center">
+            <span
+              class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-400"
+              >PostgreSQL 16</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-400"
+              >postgres_fdw</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-xs text-neutral-400"
+              >Docker Compose</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 6: SCHEMA GLOBAL ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="5"
+        data-speaker="Mehedi"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-violet-400 tracking-widest uppercase mb-3"
+          >
+            03 — Schéma global
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            Nos 9 tables, en 3 groupes
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Avant de découper, voilà à quoi ressemble la base complète
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div
+              class="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:stethoscope-linear"
+                  width="16"
+                  style="color: #3b82f6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-blue-400"
+                  >Côté médical</span
+                >
+              </div>
+              <p class="text-xs text-neutral-600 mb-3">
+                Ce que le médecin utilise
+              </p>
+              <div class="space-y-2">
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Patient
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Medecin
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Consultation
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Prescription
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  LignePrescription
+                </div>
+              </div>
+            </div>
+            <div
+              class="p-5 rounded-2xl bg-violet-500/5 border border-violet-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:pill-linear"
+                  width="16"
+                  style="color: #8b5cf6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-violet-400"
+                  >Côté médicaments</span
+                >
+              </div>
+              <p class="text-xs text-neutral-600 mb-3">
+                Le catalogue &amp; les stocks
+              </p>
+              <div class="space-y-2">
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Medicament
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Stock
+                </div>
+              </div>
+            </div>
+            <div
+              class="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:cart-large-minimalistic-linear"
+                  width="16"
+                  style="color: #10b981; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-emerald-400"
+                  >Côté ventes</span
+                >
+              </div>
+              <p class="text-xs text-neutral-600 mb-3">
+                Ce que la pharmacie vend
+              </p>
+              <div class="space-y-2">
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  Vente
+                </div>
+                <div
+                  class="px-3 py-2 rounded-lg bg-neutral-900/60 text-xs text-neutral-300 font-mono"
+                >
+                  LigneVente
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="mt-6 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+          >
+            <p class="text-xs text-neutral-500 mb-1 font-medium">
+              Exemple — table Patient :
+            </p>
+            <p class="text-xs text-neutral-400 font-mono leading-relaxed">
+              (<span class="text-amber-400 underline">IdPatient</span>, Nom,
+              Prenom, DateNaissance, Sexe, Adresse,
+              <span class="text-emerald-400 font-semibold">Ville</span>, Tel)
+            </p>
+            <p class="text-xs text-neutral-600 mt-2">
+              → C'est l'attribut <span class="text-emerald-400">Ville</span> qui
+              va nous servir pour découper
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 7: FRAGMENTATION HORIZONTALE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="6"
+        data-speaker="Mehedi"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-violet-400 tracking-widest uppercase mb-3"
+          >
+            04 — Fragmentation horizontale
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            On sépare les lignes par ville
+          </h2>
+          <p class="text-sm text-neutral-500 mb-6">
+            Concrètement : les patients de Casa restent sur le serveur de Casa
+          </p>
+
+          <div
+            class="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60 mb-6"
+          >
+            <p class="text-sm text-neutral-400 mb-3">
+              <span class="text-neutral-200 font-medium"
+                >Le principe est simple :</span
+              >
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div
+                class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs font-mono text-neutral-400"
+              >
+                <span class="text-blue-400">Patient_Casa</span> = les patients
+                où Ville = 'Casablanca'
+              </div>
+              <div
+                class="p-3 rounded-xl bg-violet-500/5 border border-violet-500/10 text-xs font-mono text-neutral-400"
+              >
+                <span class="text-violet-400">Patient_Rabat</span> = les
+                patients où Ville = 'Rabat'
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs font-medium text-neutral-400 mb-3">
+            On fait pareil pour 6 tables :
+          </p>
+          <div
+            class="overflow-hidden rounded-xl border border-neutral-800 mb-6"
+          >
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="bg-neutral-900/80">
+                  <th class="text-left p-3 font-medium text-neutral-400">
+                    Table
+                  </th>
+                  <th class="text-left p-3 font-medium text-neutral-400">
+                    On découpe sur…
+                  </th>
+                  <th class="text-center p-3 font-medium text-blue-400">
+                    S1 Casa
+                  </th>
+                  <th class="text-center p-3 font-medium text-violet-400">
+                    S2 Rabat
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="text-neutral-400">
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono">Patient</td>
+                  <td class="p-3">Ville du patient</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono">Medecin</td>
+                  <td class="p-3">Ville du médecin</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono">Stock</td>
+                  <td class="p-3">Ville de la pharmacie</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono">Vente</td>
+                  <td class="p-3">Ville de la pharmacie</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono text-neutral-500">Consultation</td>
+                  <td class="p-3 text-neutral-500">Via le médecin</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+                <tr class="border-t border-neutral-800/60">
+                  <td class="p-3 font-mono text-neutral-500">Prescription</td>
+                  <td class="p-3 text-neutral-500">Via la consultation</td>
+                  <td class="p-3 text-center text-blue-400">✓</td>
+                  <td class="p-3 text-center text-violet-400">✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <div
+              class="px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-xs text-emerald-400"
+            >
+              ✓ Aucune donnée perdue (complétude)
+            </div>
+            <div
+              class="px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-xs text-emerald-400"
+            >
+              ✓ Pas de doublons (disjonction)
+            </div>
+            <div
+              class="px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-xs text-emerald-400"
+            >
+              ✓ On reconstruit avec UNION ALL
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 8: FRAGMENTATION VERTICALE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="7"
+        data-speaker="Mehedi"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-violet-400 tracking-widest uppercase mb-3"
+          >
+            04 — Fragmentation verticale
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            On sépare les colonnes par usage
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Pour la table
+            <span class="font-mono text-neutral-300">Medicament</span>, le
+            médecin et le pharmacien n'ont pas besoin des mêmes infos
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+            <div
+              class="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:stethoscope-linear"
+                  width="16"
+                  style="color: #3b82f6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-blue-400"
+                  >Medicament_Base → S1 (Casa)</span
+                >
+              </div>
+              <p class="text-xs text-neutral-500 mb-3">
+                Ce que le médecin a besoin de savoir
+              </p>
+              <div class="space-y-1.5">
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  IdMedicament <span class="text-amber-400">PK</span>
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  NomMedicament
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  Forme <span class="text-neutral-600">(comprimé, sirop…)</span>
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  Dosage <span class="text-neutral-600">(500mg, 1g…)</span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="p-5 rounded-2xl bg-violet-500/5 border border-violet-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:cart-large-minimalistic-linear"
+                  width="16"
+                  style="color: #8b5cf6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-violet-400"
+                  >Medicament_Commercial → S2 (Rabat)</span
+                >
+              </div>
+              <p class="text-xs text-neutral-500 mb-3">
+                Ce que le pharmacien a besoin de savoir
+              </p>
+              <div class="space-y-1.5">
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  IdMedicament <span class="text-amber-400">PK</span>
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  PrixUnitaire
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  Fabricant
+                </div>
+                <div
+                  class="px-2.5 py-1.5 rounded bg-neutral-900/60 text-xs font-mono text-neutral-300"
+                >
+                  VilleProduction
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60 mb-5"
+          >
+            <p class="text-sm text-neutral-400">
+              <span class="text-neutral-200 font-medium"
+                >Pour reconstruire la table complète :</span
+              >
+              on fait un
+              <span class="text-amber-400 font-mono">JOIN</span> entre les deux
+              fragments sur l'IdMedicament
+            </p>
+          </div>
+
+          <div
+            class="p-4 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-start gap-3"
+          >
+            <iconify-icon
+              icon="solar:info-circle-linear"
+              width="16"
+              class="mt-0.5 shrink-0"
+              style="color: #f59e0b; stroke-width: 1.5"
+            ></iconify-icon>
+            <p class="text-xs text-neutral-400">
+              Attention : cette jointure passe par le
+              <span class="text-amber-400 font-medium">réseau</span> puisque les
+              2 morceaux sont sur des serveurs différents
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 9: ARCHITECTURE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="8"
+        data-speaker="Alexis"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-emerald-400 tracking-widest uppercase mb-3"
+          >
+            05 — Implémentation
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            Comment ça marche concrètement
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Deux conteneurs Docker qui communiquent via postgres_fdw
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-8">
+            <!-- S1 -->
+            <div
+              class="md:col-span-2 p-5 rounded-2xl bg-blue-500/5 border border-blue-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <div
+                  class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-xs font-bold text-blue-400"
+                >
+                  S1
+                </div>
+                <div>
+                  <p class="text-xs font-semibold">Casablanca</p>
+                  <p class="text-xs text-neutral-600 font-mono">port 5433</p>
+                </div>
+              </div>
+              <div class="space-y-1 text-xs text-neutral-400 font-mono">
+                <p>Patient <span class="text-neutral-600">(Casa)</span></p>
+                <p>Medecin <span class="text-neutral-600">(Casa)</span></p>
+                <p>Consultation <span class="text-neutral-600">(Casa)</span></p>
+                <p>Prescription <span class="text-neutral-600">(Casa)</span></p>
+                <p class="text-blue-400 font-semibold">Medicament_Base</p>
+                <p>Stock <span class="text-neutral-600">(Casa)</span></p>
+                <p>Vente <span class="text-neutral-600">(Casa)</span></p>
+              </div>
+            </div>
+
+            <!-- FDW Arrow -->
+            <div
+              class="md:col-span-1 flex flex-col items-center justify-center gap-2"
+            >
+              <iconify-icon
+                icon="solar:arrow-left-linear"
+                width="18"
+                style="color: #3b82f6; stroke-width: 1.5"
+              ></iconify-icon>
+              <div
+                class="px-3 py-2 rounded-lg bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-white/10 text-center"
+              >
+                <span
+                  class="text-xs font-semibold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent"
+                  >FDW</span
+                >
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  Foreign Data Wrapper
+                </p>
+              </div>
+              <iconify-icon
+                icon="solar:arrow-right-linear"
+                width="18"
+                style="color: #8b5cf6; stroke-width: 1.5"
+              ></iconify-icon>
+            </div>
+
+            <!-- S2 -->
+            <div
+              class="md:col-span-2 p-5 rounded-2xl bg-violet-500/5 border border-violet-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <div
+                  class="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center text-xs font-bold text-violet-400"
+                >
+                  S2
+                </div>
+                <div>
+                  <p class="text-xs font-semibold">Rabat</p>
+                  <p class="text-xs text-neutral-600 font-mono">port 5434</p>
+                </div>
+              </div>
+              <div class="space-y-1 text-xs text-neutral-400 font-mono">
+                <p>Patient <span class="text-neutral-600">(Rabat)</span></p>
+                <p>Medecin <span class="text-neutral-600">(Rabat)</span></p>
+                <p>
+                  Consultation <span class="text-neutral-600">(Rabat)</span>
+                </p>
+                <p>
+                  Prescription <span class="text-neutral-600">(Rabat)</span>
+                </p>
+                <p class="text-violet-400 font-semibold">
+                  Medicament_Commercial
+                </p>
+                <p>Stock <span class="text-neutral-600">(Rabat)</span></p>
+                <p>Vente <span class="text-neutral-600">(Rabat)</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+          >
+            <p class="text-sm text-neutral-400 text-center">
+              <span class="text-neutral-200 font-medium">FDW c'est quoi ?</span>
+              C'est une extension PostgreSQL qui permet à un serveur de lire les
+              tables d'un autre serveur comme si elles étaient locales.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 10: TRANSPARENCE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="9"
+        data-speaker="Alexis"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-emerald-400 tracking-widest uppercase mb-3"
+          >
+            05 — Transparence
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            L'utilisateur ne voit rien
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Grâce aux vues et triggers, il manipule les données comme si tout
+            était dans une seule base
+          </p>
+
+          <div class="space-y-5">
+            <!-- Vue horizontale -->
+            <div
+              class="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <iconify-icon
+                  icon="solar:rows-linear"
+                  width="14"
+                  style="color: #3b82f6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-blue-400"
+                  >Pour voir tous les patients (des 2 villes) :</span
+                >
+              </div>
+              <pre
+                class="text-xs font-mono text-neutral-400 leading-relaxed overflow-x-auto"
+              ><code><span class="text-violet-400">CREATE VIEW</span> v_Patient <span class="text-violet-400">AS</span>
+  <span class="text-blue-400">SELECT</span> * <span class="text-blue-400">FROM</span> Patient          <span class="text-neutral-600">-- données locales</span>
+  <span class="text-amber-400">UNION ALL</span>
+  <span class="text-blue-400">SELECT</span> * <span class="text-blue-400">FROM</span> Patient_Rabat;   <span class="text-neutral-600">-- données de l'autre site (via FDW)</span></code></pre>
+            </div>
+
+            <!-- Trigger -->
+            <div
+              class="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <iconify-icon
+                  icon="solar:routing-linear"
+                  width="14"
+                  style="color: #10b981; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-emerald-400"
+                  >Pour insérer un patient — le routage est automatique :</span
+                >
+              </div>
+              <pre
+                class="text-xs font-mono text-neutral-400 leading-relaxed overflow-x-auto"
+              ><code><span class="text-neutral-600">-- L'utilisateur écrit juste :</span>
+<span class="text-blue-400">INSERT INTO</span> v_Patient <span class="text-blue-400">VALUES</span> (13, 'Dupont', 'Marie', ..., <span class="text-emerald-400">'Casablanca'</span>, ...);
+
+<span class="text-neutral-600">-- Le trigger regarde la ville et envoie automatiquement :</span>
+<span class="text-neutral-600">-- → 'Casablanca' → table locale Patient</span>
+<span class="text-neutral-600">-- → 'Rabat' → table distante Patient_Rabat (via FDW)</span></code></pre>
+            </div>
+
+            <!-- Vue verticale -->
+            <div
+              class="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <iconify-icon
+                  icon="solar:tuning-2-linear"
+                  width="14"
+                  style="color: #8b5cf6; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-xs font-semibold text-violet-400"
+                  >Pour voir le catalogue médicament complet :</span
+                >
+              </div>
+              <pre
+                class="text-xs font-mono text-neutral-400 leading-relaxed overflow-x-auto"
+              ><code><span class="text-violet-400">CREATE VIEW</span> v_Medicament <span class="text-violet-400">AS</span>
+  <span class="text-blue-400">SELECT</span> b.*, c.PrixUnitaire, c.Fabricant, c.VilleProd
+  <span class="text-blue-400">FROM</span> Medicament_Base b
+  <span class="text-amber-400">JOIN</span> Medicament_Commercial c <span class="text-amber-400">ON</span> b.IdMedicament = c.IdMedicament;</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 11: REQUETES ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="10"
+        data-speaker="Alexis"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-emerald-400 tracking-widest uppercase mb-3"
+          >
+            06 — Requêtes
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            10 requêtes qu'on peut exécuter
+          </h2>
+          <p class="text-sm text-neutral-500 mb-6">
+            Du plus simple au plus complexe — toutes passent par les vues
+            globales
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              class="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center text-xs font-semibold text-emerald-400 shrink-0"
+                >1</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Lister les patients de Casablanca
+                </p>
+                <p class="text-xs text-emerald-500 mt-0.5">
+                  Simple — locale, sans réseau
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center text-xs font-semibold text-emerald-400 shrink-0"
+                >2</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Trouver le médicament le plus cher
+                </p>
+                <p class="text-xs text-emerald-500 mt-0.5">
+                  Simple — lecture du fragment commercial
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >3</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Consultations d'un patient donné
+                </p>
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  Moyen — jointure de 3 vues
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >4</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Médicaments d'une prescription
+                </p>
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  Moyen — jointure de 3 vues
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >5</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Chiffre d'affaires par ville
+                </p>
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  Casa ~434 DH · Rabat ~417 DH
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >6</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Médicament le plus vendu globalement
+                </p>
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  Amoxicilline — 5 unités
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >7</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Stock en dessous du seuil d'alerte
+                </p>
+                <p class="text-xs text-red-400 mt-0.5">
+                  3 médicaments en rupture
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-neutral-800 flex items-center justify-center text-xs font-semibold text-neutral-400 shrink-0"
+                >8</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Nb de consultations par médecin
+                </p>
+                <p class="text-xs text-neutral-600 mt-0.5">
+                  2 consultations en moyenne
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center text-xs font-semibold text-amber-400 shrink-0"
+                >9</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Patient consulté dans une ville, acheté dans l'autre
+                </p>
+                <p class="text-xs text-amber-500 mt-0.5">
+                  Complexe — cross-site
+                </p>
+              </div>
+            </div>
+            <div
+              class="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/15 flex items-start gap-3"
+            >
+              <span
+                class="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center text-xs font-semibold text-amber-400 shrink-0"
+                >10</span
+              >
+              <div>
+                <p class="text-xs font-medium text-neutral-300">
+                  Patient ayant acheté un médicament prescrit
+                </p>
+                <p class="text-xs text-amber-500 mt-0.5">
+                  Complexe — 6 jointures cross-site
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 12: ANALYSE CRITIQUE ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="11"
+        data-speaker="Arthur"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-amber-400 tracking-widest uppercase mb-3"
+          >
+            07 — Bilan
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">
+            Ce qui marche bien, et ce qu'on peut améliorer
+          </h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Un regard honnête sur notre architecture
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:check-circle-linear"
+                  width="16"
+                  style="color: #10b981; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-medium text-emerald-400"
+                  >Ce qui marche bien</span
+                >
+              </div>
+              <div class="space-y-2.5">
+                <div
+                  class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-emerald-400 font-medium"
+                    >Transparent pour l'utilisateur</span
+                  >
+                  — il fait un SELECT sur une vue, il ne sait pas que c'est
+                  réparti
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-emerald-400 font-medium"
+                    >Rapide en local</span
+                  >
+                  — un médecin de Casa ne passe jamais par le réseau pour ses
+                  patients
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-emerald-400 font-medium">Autonome</span> —
+                  chaque site fonctionne seul pour ses opérations courantes
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-emerald-400 font-medium">Extensible</span> —
+                  on peut ajouter un site Marrakech (S3) plus tard
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:danger-triangle-linear"
+                  width="16"
+                  style="color: #f59e0b; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-medium text-amber-400"
+                  >Ce qu'on peut améliorer</span
+                >
+              </div>
+              <div class="space-y-2.5">
+                <div
+                  class="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-amber-400 font-medium"
+                    >Pas de copie de secours</span
+                  >
+                  — si Rabat tombe, ses données sont inaccessibles
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-amber-400 font-medium"
+                    >Pas de clé étrangère cross-site</span
+                  >
+                  — la cohérence repose sur l'application
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-amber-400 font-medium"
+                    >Jointures distantes = lent</span
+                  >
+                  — si le réseau est lent, les vues globales aussi
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-neutral-400"
+                >
+                  <span class="text-amber-400 font-medium">IDs manuels</span> —
+                  on utilise des plages (1-100 / 101-200), fragile à long terme
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 13: SCENARIOS ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="12"
+        data-speaker="Arthur"
+      >
+        <div class="max-w-4xl mx-auto px-8 w-full">
+          <p
+            class="text-xs font-medium text-amber-400 tracking-widest uppercase mb-3"
+          >
+            07 — Scénarios
+          </p>
+          <h2 class="text-3xl font-semibold tracking-tight mb-3">Et si… ?</h2>
+          <p class="text-sm text-neutral-500 mb-8">
+            Deux questions qu'on pourrait nous poser
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <!-- Panne -->
+            <div class="p-5 rounded-2xl bg-red-500/5 border border-red-500/15">
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:danger-circle-linear"
+                  width="16"
+                  style="color: #ef4444; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-medium text-red-400"
+                  >Si le serveur de Rabat tombe ?</span
+                >
+              </div>
+              <div class="space-y-3 text-xs text-neutral-400">
+                <div class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:check-circle-linear"
+                    width="14"
+                    class="mt-0.5 shrink-0"
+                    style="color: #10b981; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span
+                    >Casablanca continue à fonctionner pour ses données
+                    locales</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:close-circle-linear"
+                    width="14"
+                    class="mt-0.5 shrink-0"
+                    style="color: #ef4444; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span
+                    >Les vues globales ne marchent plus (erreur sur les tables
+                    distantes)</span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <iconify-icon
+                    icon="solar:close-circle-linear"
+                    width="14"
+                    class="mt-0.5 shrink-0"
+                    style="color: #ef4444; stroke-width: 1.5"
+                  ></iconify-icon>
+                  <span
+                    >La vue médicament est bloquée (le fragment commercial est
+                    sur S2)</span
+                  >
+                </div>
+                <div class="mt-3 pt-3 border-t border-red-500/10">
+                  <p class="text-xs text-neutral-500">
+                    <span class="text-neutral-300 font-medium">Solution :</span>
+                    ajouter de la réplication pour avoir une copie de secours
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ajout S3 -->
+            <div
+              class="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/15"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <iconify-icon
+                  icon="solar:add-circle-linear"
+                  width="16"
+                  style="color: #10b981; stroke-width: 1.5"
+                ></iconify-icon>
+                <span class="text-sm font-medium text-emerald-400"
+                  >Si on ajoute Marrakech (S3) ?</span
+                >
+              </div>
+              <div class="space-y-3 text-xs text-neutral-400">
+                <div class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-medium shrink-0">1.</span>
+                  <span
+                    >On crée une nouvelle base
+                    <span class="font-mono text-neutral-300"
+                      >site_marrakech</span
+                    ></span
+                  >
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-medium shrink-0">2.</span>
+                  <span>On ajoute les connexions FDW (2 → 6 liens)</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-medium shrink-0">3.</span>
+                  <span>On met à jour les vues (UNION ALL avec 3 sources)</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-medium shrink-0">4.</span>
+                  <span
+                    >On ajoute 'Marrakech' dans les triggers de routage</span
+                  >
+                </div>
+                <div class="mt-3 pt-3 border-t border-emerald-500/10">
+                  <p class="text-xs text-neutral-500">
+                    <span class="text-neutral-300 font-medium"
+                      >C'est faisable</span
+                    >
+                    mais au-delà de 3 sites, il vaudrait mieux utiliser Citus
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SLIDE 14: CONCLUSION ==================== -->
+      <div
+        class="slide absolute inset-0 flex items-center justify-center hidden opacity-0"
+        data-index="13"
+        data-speaker="Tous"
+      >
+        <div class="max-w-3xl mx-auto px-8 w-full text-center">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8"
+          >
+            <iconify-icon
+              icon="solar:check-circle-linear"
+              width="14"
+              style="color: #10b981; stroke-width: 1.5"
+            ></iconify-icon>
+            <span class="text-emerald-400 text-xs font-medium">Conclusion</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight mb-8">
+            Les 4 choses à retenir
+          </h2>
+
+          <div class="space-y-4 text-left mb-10">
+            <div
+              class="flex items-start gap-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-blue-400">1</span>
+              </div>
+              <p class="text-sm text-neutral-400">
+                <span class="text-neutral-200 font-medium">Méthode claire</span>
+                — on part du schéma global, on découpe, puis on place. C'est la
+                démarche descendante.
+              </p>
+            </div>
+            <div
+              class="flex items-start gap-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-violet-400">2</span>
+              </div>
+              <p class="text-sm text-neutral-400">
+                <span class="text-neutral-200 font-medium"
+                  >Deux types de découpe</span
+                >
+                — horizontale (par ville, naturel) et verticale (par usage, plus
+                rare mais pertinent ici).
+              </p>
+            </div>
+            <div
+              class="flex items-start gap-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-emerald-400">3</span>
+              </div>
+              <p class="text-sm text-neutral-400">
+                <span class="text-neutral-200 font-medium"
+                  >Transparent pour l'utilisateur</span
+                >
+                — les vues et triggers font tout le travail, il n'a pas besoin
+                de savoir où sont les données.
+              </p>
+            </div>
+            <div
+              class="flex items-start gap-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/60"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0"
+              >
+                <span class="text-sm font-semibold text-amber-400">4</span>
+              </div>
+              <p class="text-sm text-neutral-400">
+                <span class="text-neutral-200 font-medium">Des compromis</span>
+                — répartir, c'est gagner en performance locale mais accepter
+                plus de complexité (réseau, cohérence, pannes).
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="flex flex-wrap items-center justify-center gap-3 text-xs mb-8"
+          >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400"
+              >Mehedi</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400"
+              >Adil</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+              >Alexis</span
+            >
+            <span
+              class="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400"
+              >Arthur</span
+            >
+          </div>
+
+          <p
+            class="text-2xl font-medium bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent mb-2"
+          >
+            Merci !
+          </p>
+          <p class="text-sm text-neutral-500">Des questions ?</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentIndex = 0;
+      const slides = document.querySelectorAll('.slide');
+      const totalSlides = slides.length;
+      let isAnimating = false;
+
+      const speakerColors = {
+        Adil: {
+          bg: 'rgba(59,130,246,0.08)',
+          border: 'rgba(59,130,246,0.2)',
+          text: '#60a5fa',
+        },
+        Mehedi: {
+          bg: 'rgba(139,92,246,0.08)',
+          border: 'rgba(139,92,246,0.2)',
+          text: '#a78bfa',
+        },
+        Alexis: {
+          bg: 'rgba(16,185,129,0.08)',
+          border: 'rgba(16,185,129,0.2)',
+          text: '#34d399',
+        },
+        Arthur: {
+          bg: 'rgba(245,158,11,0.08)',
+          border: 'rgba(245,158,11,0.2)',
+          text: '#fbbf24',
+        },
+        Tous: {
+          bg: 'rgba(255,255,255,0.04)',
+          border: 'rgba(255,255,255,0.1)',
+          text: '#a3a3a3',
+        },
+      };
+
+      document.getElementById('totalSlides').textContent = totalSlides;
+
+      function updateSpeakerBadge(index) {
+        const badge = document.getElementById('speakerBadge');
+        const speaker = slides[index].getAttribute('data-speaker') || '';
+        const colors = speakerColors[speaker] || speakerColors['Tous'];
+        badge.style.backgroundColor = colors.bg;
+        badge.style.borderColor = colors.border;
+        badge.style.color = colors.text;
+        badge.textContent = speaker === 'Tous' ? '👥 Tous' : '🎤 ' + speaker;
+      }
+
+      function updateSlide(newIndex, direction = 1) {
+        if (
+          isAnimating ||
+          newIndex < 0 ||
+          newIndex >= totalSlides ||
+          newIndex === currentIndex
+        )
+          return;
+        isAnimating = true;
+
+        const currentSlide = slides[currentIndex];
+        const nextSlide = slides[newIndex];
+
+        nextSlide.classList.remove('hidden');
+        nextSlide.style.opacity = '0';
+        nextSlide.style.transform = `translateY(${direction * 30}px)`;
+        nextSlide.style.transition = 'none';
+
+        nextSlide.offsetHeight;
+
+        currentSlide.style.transition =
+          'opacity 0.4s ease, transform 0.4s ease';
+        currentSlide.style.opacity = '0';
+        currentSlide.style.transform = `translateY(${-direction * 30}px)`;
+
+        nextSlide.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        nextSlide.style.opacity = '1';
+        nextSlide.style.transform = 'translateY(0)';
+
+        setTimeout(() => {
+          currentSlide.classList.add('hidden');
+          currentSlide.style.transform = '';
+          currentIndex = newIndex;
+          document.getElementById('currentSlide').textContent =
+            currentIndex + 1;
+          document.getElementById('progressBar').style.width =
+            (currentIndex / (totalSlides - 1)) * 100 + '%';
+          updateSpeakerBadge(currentIndex);
+          isAnimating = false;
+        }, 420);
+      }
+
+      function nextSlide() {
+        updateSlide(currentIndex + 1, 1);
+      }
+      function prevSlide() {
+        updateSlide(currentIndex - 1, -1);
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          nextSlide();
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+          e.preventDefault();
+          prevSlide();
+        }
+        if (e.key === 'Home') {
+          e.preventDefault();
+          updateSlide(0, -1);
+        }
+        if (e.key === 'End') {
+          e.preventDefault();
+          updateSlide(totalSlides - 1, 1);
+        }
+      });
+
+      let touchStartX = 0;
+      document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      });
+      document.addEventListener('touchend', (e) => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+          diff > 0 ? nextSlide() : prevSlide();
+        }
+      });
+
+      function toggleTheme() {
+        const isLight = document.body.classList.toggle('light');
+        document.getElementById('themeIcon').setAttribute(
+          'icon',
+          isLight ? 'solar:moon-linear' : 'solar:sun-linear'
+        );
+      }
+
+      // Init
+      slides[0].style.opacity = '1';
+      updateSpeakerBadge(0);
+    </script>
+  </body>
+</html>
