@@ -30,8 +30,14 @@ Mot de passe : `postgres`
 
 ## Executer les requetes
 
+Avec `psql` installe en local :
 ```bash
 psql -h localhost -p 5433 -U postgres -d site_casablanca -f 06_requetes.sql
+```
+
+Sans `psql` en local (via Docker) :
+```bash
+docker exec -i site_casablanca psql -U postgres -d site_casablanca < 06_requetes.sql
 ```
 
 ## Arret
